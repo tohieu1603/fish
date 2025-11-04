@@ -203,17 +203,33 @@ class OrderService:
             OrderStatus.COMPLETED.value,
         ]
 
-        # Allow moving to any status in the workflow (forward or backward)
-        # except moving TO completed from non-delivery status
-        if new_status == OrderStatus.COMPLETED.value and current_status != OrderStatus.DELIVERY.value:
-            raise ValueError(
-                "Chỉ có thể chuyển sang 'Hoàn thành' từ trạng thái 'Giao hàng'"
-            )
-
         # Validate new status is in workflow
         if new_status not in workflow_order:
             raise ValueError(
                 f"Trạng thái '{new_status}' không hợp lệ"
+            )
+
+        # Get current and new status indices
+        try:
+            current_index = workflow_order.index(current_status)
+            new_index = workflow_order.index(new_status)
+        except ValueError:
+            raise ValueError("Trạng thái không hợp lệ")
+
+        # Special case: Can jump from PAYMENT to DELIVERY
+        if current_status == OrderStatus.PAYMENT.value and new_status == OrderStatus.DELIVERY.value:
+            return
+
+        # Can only move to adjacent status (forward or backward by 1 step)
+        if abs(new_index - current_index) != 1:
+            raise ValueError(
+                "Không thể nhảy cóc trạng thái. Vui lòng chuyển tuần tự theo quy trình."
+            )
+
+        # Additional check: Can only move TO completed from delivery status
+        if new_status == OrderStatus.COMPLETED.value and current_status != OrderStatus.DELIVERY.value:
+            raise ValueError(
+                "Chỉ có thể chuyển sang 'Hoàn thành' từ trạng thái 'Giao hàng'"
             )
 
     def _validate_transition_requirements(self, order: Order, new_status: str):

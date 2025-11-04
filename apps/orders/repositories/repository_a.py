@@ -43,7 +43,10 @@ class OrderRepository:
             queryset = queryset.filter(created_at__gte=filters.date_from)
 
         if filters.date_to:
-            queryset = queryset.filter(created_at__lte=filters.date_to)
+            # Include entire day by adding 1 day and using __lt
+            from datetime import timedelta
+            end_date = filters.date_to + timedelta(days=1)
+            queryset = queryset.filter(created_at__lt=end_date)
 
         return queryset
 
