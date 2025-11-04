@@ -8,19 +8,30 @@ from apps.users.models import User
 
 
 def generate_order_number():
-    """Generate unique order number."""
+    """Generate unique order number with format: DHYYYYMMDDxxxx (random 4 digits)."""
     from datetime import datetime
+    import random
     now = datetime.now()
-    prefix = f"DH{now.strftime('%y%m%d')}"
+    prefix = f"DH{now.strftime('%Y%m%d')}"  # Changed to full year YYYY
 
-    # Get last order of today
+    # Generate random 4-digit number
+    max_attempts = 10
+    for _ in range(max_attempts):
+        random_suffix = f"{random.randint(0, 9999):04d}"
+        order_number = f"{prefix}{random_suffix}"
+
+        # Check if this number already exists
+        if not Order.objects.filter(order_number=order_number).exists():
+            return order_number
+
+    # If all random attempts failed, fall back to sequential
     last_order = Order.objects.filter(
         order_number__startswith=prefix
     ).order_by('-order_number').first()
 
     if last_order:
         last_seq = int(last_order.order_number[-4:])
-        seq = last_seq + 1
+        seq = (last_seq + 1) % 10000  # Wrap around at 9999
     else:
         seq = 1
 
