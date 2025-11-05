@@ -84,7 +84,7 @@ class OrderService:
 
         # Create order với thông tin khách hàng nhập trực tiếp
         order = Order.objects.create(
-            order_name=order_data.order_name,  # User-provided name
+            order_name='',  # Temporary placeholder, will be set below
             customer_name=order_data.customer_name,
             customer_phone=order_data.customer_phone,
             customer_address=order_data.customer_address,
@@ -99,6 +99,14 @@ class OrderService:
             created_by=user,
             notes=order_data.notes
         )
+
+        # Auto-generate order_name if not provided (use order_number)
+        if not order_data.order_name:
+            order.order_name = order.order_number
+            order.save(update_fields=['order_name'])
+        else:
+            order.order_name = order_data.order_name
+            order.save(update_fields=['order_name'])
 
         # Add items
         for item_data in order_data.items:

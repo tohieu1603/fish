@@ -20,8 +20,8 @@ class ProductItemInput(BaseModel):
 class CreateOrderSchema(BaseModel):
     """Schema for creating an order - nhân viên nội bộ tạo đơn."""
 
-    # Tên đơn hàng (user input, REQUIRED)
-    order_name: str = Field(..., min_length=1, max_length=255, description="Tên đơn hàng (có thể trùng)")
+    # Tên đơn hàng (OPTIONAL, auto-generated if not provided)
+    order_name: Optional[str] = Field(None, min_length=1, max_length=255, description="Tên đơn hàng (tùy chọn, tự động nếu bỏ trống)")
 
     # Thông tin khách đặt hàng (nhập trực tiếp)
     customer_name: str = Field(min_length=1, max_length=255)
