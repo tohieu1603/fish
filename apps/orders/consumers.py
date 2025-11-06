@@ -45,10 +45,21 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         """
-        Receive message from WebSocket (currently not used for client->server).
-        This consumer is primarily for server->client broadcasts.
+        Receive message from WebSocket.
+        Handles ping/pong for keeping connection alive.
         """
-        pass
+        try:
+            data = json.loads(text_data)
+            message_type = data.get('type')
+
+            # Handle ping messages to keep connection alive
+            if message_type == 'ping':
+                await self.send(text_data=json.dumps({
+                    'type': 'pong',
+                    'timestamp': data.get('timestamp')
+                }))
+        except json.JSONDecodeError:
+            pass
 
     # Handler for order_created event
     async def order_created(self, event):
