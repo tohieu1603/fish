@@ -10,6 +10,6 @@ urlpatterns = [
     path('api/', api.urls),
 ]
 
-# Serve media files in development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve media files (both development and production)
+# Note: For better performance in production, use nginx/apache to serve static/media files
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
